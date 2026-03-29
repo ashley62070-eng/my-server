@@ -1,6 +1,10 @@
 from flask import Flask, request
+import logging
 
 app = Flask(__name__)
+
+# Enable proper logging (important for Render)
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
 def home():
@@ -8,14 +12,14 @@ def home():
 
 @app.route('/api', methods=['POST'])
 def receive():
-    msg = request.form.get("message")
+    # Get message from form or raw body
+    msg = request.form.get("message") or request.data.decode()
 
-    # fallback if form is empty
-    if not msg:
-        msg = request.data.decode()
+    # Log it (this WILL show in Render logs)
+    app.logger.info(f"🔥 Received: {msg}")
 
-    print("Received:", msg)
-
+    # Return response
     return f"Received: {msg}"
 
-app.run(host="0.0.0.0", port=10000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
